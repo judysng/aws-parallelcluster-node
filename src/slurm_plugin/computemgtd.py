@@ -185,6 +185,7 @@ def _run_computemgtd(config_file):
     """Run computemgtd actions."""
     # Initial default heartbeat time as computemgtd startup time
     last_heartbeat = datetime.now(tz=timezone.utc)
+    log.info("njud TESTING")
     log.info("Initializing clustermgtd heartbeat to be computemgtd startup time: %s", last_heartbeat)
     computemgtd_config = _load_daemon_config(config_file)
     reload_config_counter = RELOAD_CONFIG_ITERATIONS
