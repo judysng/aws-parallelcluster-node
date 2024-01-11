@@ -33,6 +33,7 @@ from slurm_plugin.common import (
     log_exception,
 )
 from slurm_plugin.slurm_resources import CONFIG_FILE_DIR
+from tempfile import mkstemp
 
 LOOP_TIME = 60
 RELOAD_CONFIG_ITERATIONS = 10
@@ -57,6 +58,7 @@ class ComputemgtdConfig:
     }
 
     def __init__(self, config_file_path):
+        _, self._local_config_file = mkstemp()
         self._get_config(config_file_path)
 
     def __repr__(self):
@@ -72,12 +74,12 @@ class ComputemgtdConfig:
             # Validation to sanitize the input argument and make it safe to use the function affected by B604
             validate_absolute_path(config_file_path)
             # Use subprocess based method to copy shared file to local to prevent hanging when NFS is down
-            config_str = check_command_output(
-                f"cat {config_file_path}",
+            run_command(
+                f"cat {config_file_path} > {self._local_config_file}",
                 timeout=DEFAULT_COMMAND_TIMEOUT,
                 shell=True,  # nosec B604
             )
-            config.read_file(StringIO(config_str))
+            config.read_file(open(self._local_config_file, "r"))
         except Exception:
             log.error("Cannot read computemgtd configuration file: %s", config_file_path)
             raise
